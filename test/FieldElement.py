@@ -159,6 +159,12 @@ class FieldElementTest(TestCase):
         b = FieldElement(11, 31)
         self.assertEqual(a**-4 * b, FieldElement(13, 31))
 
+    def test_rmul(self):
+        print("********** [유한체 숫자 * 객체] **********")
+        a = FieldElement(3, 31)
+        b = FieldElement(9, 31)
+        c = 3 * a
+        self.assertEqual(b, c)
 
 ## 학습 과정에서 유한체 예제 학습 
 run(FieldElementTest("exerciseTest1"))
@@ -177,3 +183,4 @@ run(FieldElementTest("test_sub"))
 run(FieldElementTest("test_mul"))
 run(FieldElementTest("test_pow"))
 run(FieldElementTest("test_div"))
+run(FieldElementTest("test_rmul"))

@@ -93,6 +93,7 @@ class PointTest(TestCase):
         a = Point(-1, -1, 5, 7)
         self.assertEqual(a + a, Point(18, 77, 5, 7))
 
+
 # 타원곡선 관련된 테스트 코드 구현
 run(PointTest("exerciseTest1"))
 run(PointTest("exerciseTest2"))
