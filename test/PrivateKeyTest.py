@@ -40,9 +40,29 @@ class PrivateKeyTest(TestCase):
         key = PrivateKey(1000000)
         PrivateKey.deterministic_k(key, z)
         
+    def exerciseTest2(self):
+        print("********** [비밀키를 WIF 형식으로 출력] **********")
+        print("5003 공개키는 압축 SEC형식으로 테스트넷에서 사용")
+        priv = PrivateKey(5003)
+        print(priv.wif(compressed=True, testnet=True))
+
+    def exerciseTest3(self):
+        print("********** [비밀키를 WIF 형식으로 출력] **********")
+        print("2021**5 공개키는 비압축 SEC형식으로 테스트넷에서 사용")
+        priv = PrivateKey(2021**5)
+        print(priv.wif(compressed=False, testnet=True))
+
+    def exerciseTest4(self):
+        print("********** [비밀키를 WIF 형식으로 출력] **********")
+        print("0x54321deadbeef 공개키는 압축 SEC 형식으로 메인넷에서 사용")
+        priv = PrivateKey(0x54321deadbeef)
+        print(priv.wif(compressed=True, testnet=False))  
 
 # 서명 생성  과정에서 얻은 예제 실험
 run(PrivateKeyTest("exerciseTest1"))
+run(PrivateKeyTest("exerciseTest2"))
+run(PrivateKeyTest("exerciseTest3"))
+run(PrivateKeyTest("exerciseTest4"))
 
 # PrivateKey 객체에 선언된 함수들을 실험
 run(PrivateKeyTest("test_sign"))

@@ -6,12 +6,13 @@ sys.path.append(os.path.abspath(path))
 
 from unittest import TestCase
 from lib.helper import run
+from lib.helper import hash256
 from src.FieldElement import FieldElement
 from src.Point import Point
 from src.S256Field import S256Field
 from src.S256Point import S256Point, N
 from src.Signature import Signature
-from lib.helper import hash256
+from src.PrivateKey import PrivateKey
 
 class S256PointTest(TestCase):
     def exerciseTest1(self):
@@ -157,6 +158,110 @@ class S256PointTest(TestCase):
         sig = Signature(r, s)
         print("검증 : ", S256Point.verify(point ,G, z, sig))
 
+    def test_sec(self):
+        print("********** [공개키를 비압축 SEC 형식으로 반환 결과 확인] **********")
+        print("e = 5.000")
+        G = S256Point(0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8)
+        e = int(5.000)
+        point = e * G      
+        result = S256Point.sec(point, False).hex()
+        print(result)
+
+        print("\ne = (2.018 ** 5)")
+        e = int(2.018 ** 5)
+        point = e * G
+        result = S256Point.sec(point,False).hex()
+        print(result)
+
+        print("\ne = (0xdeadheef12345)")
+        e = int.from_bytes(b'0xdeadheef12345', 'big')
+        point = e * G
+        result = S256Point.sec(point, False).hex()
+        print(result)
+
+    def test_parse(self):
+        print("********** [공개키를 압축 SEC형식으로 반환 결과 확인] **********")
+        print("e = 5001")
+        G = S256Point(0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8)
+        e = int(5001)
+        point = e * G      
+        result = S256Point.sec(point, True).hex()
+        print(result)
+
+        print("\ne = 3")
+        e = int(3)
+        point = e * G
+        result = S256Point.sec(point, True).hex()
+        print(result)
+
+        print("\ne = (2.018 ** 5)")
+        e = int(2.018 ** 5)
+        point = e * G
+        result = S256Point.sec(point,True).hex()
+        print(result)
+
+        print("\ne = (0xdeadheef12345)")
+        e = int.from_bytes(b'0xdeadheef12345', 'big')
+        point = e * G
+        result = S256Point.sec(point, True).hex()
+        print(result)
+
+    def exerciseTest9(self):
+        print("********** [비밀키에 대응하는 공개키를 구하고, 비트코인 주소 확인] **********")
+        print("공개키 : 5002, 테스트넷에서 비압축 SEC형식 사용")
+        G = S256Point(0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8)
+        print("<첫번째>")
+        e = 5002
+        point = e * G
+        publicKey = S256Point.sec(point, False).hex()
+        print("공개키 : ", publicKey)
+        bitcoinAddress = S256Point.address(point, False, True)
+        print("비트코인 주소 : ", bitcoinAddress)
+
+        print("<두번째>")
+        priv = PrivateKey(5002)
+        print("공개키 : ", S256Point.sec(priv.point,False).hex())
+        bitcoinAddress = priv.point.address(compressed=False, testnet=True)
+        print("비트코인 주소 : ", bitcoinAddress)
+
+    def exerciseTest10(self): 
+        print("********** [비밀키에 대응하는 공개키를 구하고, 비트코인 주소 확인] **********")
+        print("공개키 : 2020**5, 테스트넷에서 압축 SEC형식 사용")
+        G = S256Point(0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8)
+        print("<첫번째>")
+        e = 2020**5
+        point = e * G
+        publicKey = S256Point.sec(point, True).hex()        
+        print("공개키 : ", publicKey)
+        bitcoinAddress = S256Point.address(point, True, True)
+        print("비트코인 주소 : ", bitcoinAddress)
+
+        print("<두번째>")
+        priv = PrivateKey(2020**5)
+        print("공개키 : ", S256Point.sec(priv.point, True).hex())
+        bitcoinAddress = priv.point.address(compressed=True, testnet=True)
+        print("비트코인 주소 : ", bitcoinAddress)
+
+    def exerciseTest11(self): 
+        print("********** [비밀키에 대응하는 공개키를 구하고, 비트코인 주소 확인] **********")
+        print("공개키 : 0x54321deadbeef, 테스트넷에서 비압축 SEC형식 사용")
+        G = S256Point(0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8)
+        print("<첫번째>")
+        e = 0x12345deadbeef
+        point = e * G
+        publicKey = point.sec(compressed=True).hex()
+        print("공개키 : ", publicKey)
+        bitcoinAddress = S256Point.address(point, True, False)
+        print("비트코인 주소 : ", bitcoinAddress)
+
+        print("<두번째>")
+        priv = PrivateKey(0x12345deadbeef)
+        print("공개키 : ", S256Point.sec(priv.point,True).hex())
+        bitcoinAddress = priv.point.address(compressed=True, testnet=False)
+        print("비트코인 주소 : ", bitcoinAddress)
+
+
+
 # 타원곡선의 학습 과정에서 예제 실험
 run(S256PointTest("exerciseTest1"))
 run(S256PointTest("exerciseTest2"))
@@ -167,3 +272,8 @@ run(S256PointTest("exerciseTest6"))
 run(S256PointTest("exerciseTest7"))
 run(S256PointTest("exerciseTest8"))
 run(S256PointTest("test__verify"))
+run(S256PointTest("test_sec"))
+run(S256PointTest("test_parse"))
+run(S256PointTest("exerciseTest9"))
+run(S256PointTest("exerciseTest10"))
+run(S256PointTest("exerciseTest11"))
