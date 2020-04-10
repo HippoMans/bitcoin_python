@@ -16,6 +16,14 @@ from lib.Op import op_hash160
 from lib.Op import op_checksig
 from lib.Op import decode_num
 from lib.Op import op_checkmultisig
+from lib.Op import op_0
+from lib.Op import op_1negate
+from lib.Op import op_1
+from lib.Op import op_16
+from lib.Op import op_nop
+from lib.Op import op_1add
+from lib.Op import op_1sub
+from lib.Op import op_0notequal
 
 LOGGER = getLogger(__name__)
 
@@ -49,7 +57,62 @@ class OpTest(TestCase):
         self.assertTrue(op_checkmultisig(stack, z))
         self.assertEqual(decode_num(stack[0]), 1)
 
+    def test_op_0(self):
+        stack = []
+        self.assertTrue(op_0(stack))
+        print(stack)
+        self.assertEqual(stack[0], b'')
+
+    def test_op_1negate(self):
+        stack = []
+        self.assertTrue(op_1negate(stack))
+        print(stack)
+        self.assertEqual(stack[0], b'\x81')
+
+    def test_op_1(self):
+        stack = []
+        self.assertTrue(op_1(stack))
+        print(stack) 
+        self.assertEqual(stack[0], b'\01')
+
+    def test_op_16(self):
+        stack = []
+        self.assertTrue(op_16(stack))
+        print(stack)
+        self.assertEqual(stack[0], b'\x10')
+
+    def test_op_nop(self):
+        stack = []
+        self.assertTrue(op_nop(stack))
+        print(stack)
+        self.assertEqual(op_nop(stack), True)
+
+    def test_op_1add(self):
+        stack = [b'1',b'2',b'3']
+        self.assertTrue(op_1add(stack))
+        print(stack)
+        self.assertEqual(stack, [b'1', b'2', b'4'])
+
+    def test_op_1sub(self):
+        stack = [b'1', b'2',b'3']
+        self.assertTrue(op_1sub(stack)) 
+        print(stack)
+        self.assertEqual(stack, [b'1', b'2', b'2'])
+
+    def test_op_0notequal(self):
+        stack = [b'']
+        self.assertTrue(op_0notequal(stack))
+        print(stack) 
+
 # lib 디렉토리에 있는 Op.py 파일을 실행
 run(OpTest("test_op_hash160"))
 run(OpTest("test_op_checksig"))
 run(OpTest("test_op_checkmultisig"))
+run(OpTest("test_op_0"))
+run(OpTest("test_op_1negate"))
+run(OpTest("test_op_1"))
+run(OpTest("test_op_16"))
+run(OpTest("test_op_nop"))
+run(OpTest("test_op_1add"))
+run(OpTest("test_op_1sub"))
+run(OpTest("test_op_0notequal"))
