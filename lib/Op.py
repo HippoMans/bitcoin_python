@@ -386,7 +386,7 @@ def op_equalverify(stack):
     return op_equal(stack) and op_verify(stack)
 
 #  stack의 맨 위 input을 +1하여 stack에 추가됩니다.
-def op_ladd(stack):
+def op_1add(stack):
     if len(stack) < 1:
         return False
     element = decode_num(stack.pop())
@@ -435,7 +435,7 @@ def op_not(stack):
 def op_0notequal(stack):
     if len(stack) < 1:
         return False
-    element  stack.pop()
+    element = stack.pop()
     if decode_num(element) == 0:
         stack.append(encode_num(0))
     else:
