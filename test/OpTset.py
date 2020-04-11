@@ -24,6 +24,28 @@ from lib.Op import op_nop
 from lib.Op import op_1add
 from lib.Op import op_1sub
 from lib.Op import op_0notequal
+from lib.Op import op_toaltstack
+from lib.Op import op_fromaltstack
+from lib.Op import op_2dup
+from lib.Op import op_2over
+from lib.Op import op_2rot
+from lib.Op import op_2swap
+from lib.Op import op_depth
+from lib.Op import op_drop
+from lib.Op import op_nip
+from lib.Op import op_size
+from lib.Op import op_equal
+from lib.Op import op_equalverify
+from lib.Op import op_abs
+from lib.Op import op_not
+from lib.Op import op_0notequal
+from lib.Op import op_add
+from lib.Op import op_sub
+from lib.Op import op_booland
+from lib.Op import op_boolor
+from lib.Op import op_numequal
+from lib.Op import op_numnotequal
+
 
 LOGGER = getLogger(__name__)
 
@@ -104,6 +126,139 @@ class OpTest(TestCase):
         self.assertTrue(op_0notequal(stack))
         print(stack) 
 
+    def test_op_toaltstack(self):
+        stack = [1,2,3,4]
+        other = []
+        self.assertTrue(op_toaltstack(stack, other))
+        print("stack : ", stack)
+        print("other : ", other)
+        self.assertEqual(stack, [1,2,3])
+        self.assertEqual(other, [4])
+
+    def test_op_fromaltstack(self):
+        stack = [1,2]
+        other = [3,4]
+        self.assertTrue(op_fromaltstack(stack, other))
+        print("stack : ", stack)
+        print("other : ", other)
+        self.assertEqual(stack, [1,2,4])
+        self.assertEqual(other, [3])
+
+    def test_op_2dup(self):
+        stack = [1,2,3,4]
+        self.assertTrue(op_2dup(stack))
+        print(stack)
+        self.assertEqual(stack, [1,2,3,4,3,4])
+
+    def test_op_2over(self):
+        stack = [1,2,3,4]
+        self.assertTrue(op_2over(stack))
+        print(stack)
+        self.assertEqual(stack, [1,2,3,4,1,2])
+
+    def test_op_2rot(self):
+        stack = [1,2,3,4,5,6]
+        self.assertTrue(op_2rot(stack))
+        print(stack)
+        self.assertEqual(stack, [1,2,3,4,5,6,1,2])
+
+    def test_op_2swap(self):
+        stack = [1,2,3,4]
+        self.assertTrue(op_2swap(stack))
+        print(stack)
+        self.assertEqual(stack, [3,4,1,2])
+
+    def test_op_depth(self):
+        stack = [1,2,3,100]
+        self.assertTrue(op_depth(stack))
+        print(stack)
+        self.assertEqual(stack, [1,2,3,100, b'\x04'])
+
+    def test_op_drop(self):
+        stack = [1,2,3,4]
+        self.assertTrue(op_drop(stack))
+        print(stack)
+        self.assertEqual(stack, [1,2,3])
+
+    def test_op_nip(self):
+        stack = [1,2,3]
+        self.assertTrue(op_nip(stack))
+        print(stack)
+        self.assertEqual(stack, [1,3])
+
+    def test_op_size(self):
+        stack = [b'1',b'2',b'3',b'4']
+        self.assertTrue(op_size(stack))
+        print(stack)
+        self.assertEqual(stack, [b'1', b'2', b'3', b'4', b'\x01'])
+
+    def test_op_equal(self):
+        stack = [1,2,3,3]
+        self.assertTrue(op_equal(stack))
+        print(stack)
+        self.assertEqual(stack, [1,2, b'\x01'])
+
+    def test_op_equalverify(self):
+        stack = [b'1', b'2', b'3', b'3']
+        self.assertTrue(op_equalverify(stack))
+        print(stack)
+        self.assertEqual(stack, [b'1',b'2'])
+
+    def test_op_abs(self):
+        stack = [b'1', b'-2']
+        self.assertTrue(op_abs(stack))
+        print(stack)
+        self.assertEqual(stack, [b'1', b'-2'])
+
+    def test_op_not(self):
+        stack = [b'']
+        self.assertTrue(op_not(stack))
+        print(stack)
+        self.assertEqual(stack, [b'\x01'])
+
+    def test_op_0notequal(self):
+        stack = [b'1', b'2']
+        self.assertTrue(op_0notequal(stack))
+        print(stack) 
+        self.assertTrue(stack, [b'\x01'])
+
+    def test_op_add(self):
+        stack = [b'1', b'1']
+        self.assertTrue(op_add(stack))
+        print(stack)
+        self.assertTrue(stack, [b'b'])
+
+    def test_op_sub(self):
+        stack = [b'3', b'2']
+        self.assertTrue(op_sub(stack))
+        print(stack)
+        self.assertTrue(stack, [b'\x01'])
+
+    def test_op_booland(self):
+        stack = [b'1', b'2']
+        self.assertTrue(op_booland(stack))
+        print(stack)
+        self.assertTrue(stack, [b'\x01'])
+
+    def test_op_boolor(self):
+        stack = [b'1', b'2',b'3']
+        self.assertTrue(op_boolor(stack))
+        print(stack)
+        self.assertTrue(stack, [b'1', b'\x01'])
+
+    def test_op_numequal(self):
+        stack = [b'1', b'2']
+        self.assertTrue(op_numequal(stack))
+        print(stack)
+        self.assertTrue(stack, [b''])
+
+    def test_op_numnotequal(self):
+        stack = [b'1', b'2']
+        self.assertTrue(op_numnotequal(stack))
+        print(stack)
+        self.assertTrue(stack, [b'\x01'])
+
+
 # lib 디렉토리에 있는 Op.py 파일을 실행
 run(OpTest("test_op_hash160"))
 run(OpTest("test_op_checksig"))
@@ -116,3 +271,24 @@ run(OpTest("test_op_nop"))
 run(OpTest("test_op_1add"))
 run(OpTest("test_op_1sub"))
 run(OpTest("test_op_0notequal"))
+run(OpTest("test_op_toaltstack"))
+run(OpTest("test_op_fromaltstack"))
+run(OpTest("test_op_2dup"))
+run(OpTest("test_op_2over"))
+run(OpTest("test_op_2rot"))
+run(OpTest("test_op_2swap"))
+run(OpTest("test_op_depth"))
+run(OpTest("test_op_drop"))
+run(OpTest("test_op_nip"))
+run(OpTest("test_op_size"))
+run(OpTest("test_op_equal"))
+run(OpTest("test_op_equalverify"))
+run(OpTest("test_op_abs"))
+run(OpTest("test_op_not"))
+run(OpTest("test_op_0notequal"))
+run(OpTest("test_op_add"))
+run(OpTest("test_op_sub"))
+run(OpTest("test_op_booland"))
+run(OpTest("test_op_boolor"))
+run(OpTest("test_op_numequal"))
+run(OpTest("test_op_numnotequal"))
