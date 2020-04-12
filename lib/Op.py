@@ -482,6 +482,7 @@ def op_boolor(stack):
         stack.append(encode_num(1))
     else:
         stack.append(encode_num(0))
+    return True
   
 # stack의 상위 2개(a,b)가 같으면 1이 stack에 들어가고, 다르면 0이 stack에 들어간다.
 def op_numequal(stack):
