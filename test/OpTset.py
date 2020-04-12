@@ -12,9 +12,12 @@ from lib.helper import hash256
 from src.Signature import Signature
 from src.PrivateKey import PrivateKey
 
+from lib.Op import encode_num
+from lib.Op import decode_num
 from lib.Op import op_hash160
 from lib.Op import op_checksig
-from lib.Op import decode_num
+from lib.Op import op_verify
+from lib.Op import op_return
 from lib.Op import op_checkmultisig
 from lib.Op import op_0
 from lib.Op import op_1negate
@@ -26,10 +29,13 @@ from lib.Op import op_1sub
 from lib.Op import op_0notequal
 from lib.Op import op_toaltstack
 from lib.Op import op_fromaltstack
+from lib.Op import op_2drop
 from lib.Op import op_2dup
+from lib.Op import op_3dup
 from lib.Op import op_2over
 from lib.Op import op_2rot
 from lib.Op import op_2swap
+from lib.Op import op_ifdup
 from lib.Op import op_depth
 from lib.Op import op_drop
 from lib.Op import op_nip
@@ -45,11 +51,37 @@ from lib.Op import op_booland
 from lib.Op import op_boolor
 from lib.Op import op_numequal
 from lib.Op import op_numnotequal
+from lib.Op import op_lessthan
+from lib.Op import op_greaterthan
+from lib.Op import op_lessthanorequal
+from lib.Op import op_greaterthanorequal
+from lib.Op import op_min
+from lib.Op import op_max
+from lib.Op import op_within
+from lib.Op import op_ripemd160
+from lib.Op import op_sha1
+from lib.Op import op_sha256
+from lib.Op import op_hash160
+from lib.Op import op_pick
+from lib.Op import op_tuck
+from lib.Op import op_negate
 
 
 LOGGER = getLogger(__name__)
 
 class OpTest(TestCase):
+
+    def test_encode_num(self):
+        num = 10000
+        self.assertTrue(encode_num(num))
+        print(encode_num(num))
+        self.assertEqual(encode_num(num), b"\x10'")
+
+    def test_decode_num(self):
+        element = b'10000'
+        self.assertTrue(decode_num(element))
+        print(decode_num(element))
+        self.assertEqual(decode_num(element), 206966894641)
 
     def test_op_hash160(self):
         stack = [b'hello world']
@@ -57,6 +89,18 @@ class OpTest(TestCase):
         self.assertTrue(op_hash160(stack))
         print("stack : ", stack[0].hex())
         self.assertEqual(stack[0].hex(), 'd7d5ee7824ff93f94c3055af9382c86c68b5ca92')
+
+    def test_op_verify(self):
+        stack = [b'10000', b'100', b'001']
+        self.assertTrue(op_verify(stack))
+        print(stack)
+        self.assertEqual(stack, [b'10000', b'100'])
+
+    def test_op_return(self):
+        stack = [b'1000', b'100', b'10']
+        self.assertFalse(op_return(stack))
+        print(stack)
+        self.assertEqual(stack, [b'1000', b'100', b'10'])
 
     def test_op_checksig(self):
         # z는 서명
@@ -144,11 +188,23 @@ class OpTest(TestCase):
         self.assertEqual(stack, [1,2,4])
         self.assertEqual(other, [3])
 
+    def test_op_2drop(self):
+        stack = [b'1', b'2', b'3']
+        self.assertTrue(op_2drop(stack))
+        print(stack)
+        self.assertEqual(stack, [b'1'])
+
     def test_op_2dup(self):
         stack = [1,2,3,4]
         self.assertTrue(op_2dup(stack))
         print(stack)
         self.assertEqual(stack, [1,2,3,4,3,4])
+
+    def test_op_3dup(self):
+        stack = [1,2,3,4,5]
+        self.assertTrue(op_3dup(stack))
+        print(stack)
+        self.assertEqual(stack, [1,2,3,4,5,3,4,5])
 
     def test_op_2over(self):
         stack = [1,2,3,4]
@@ -167,6 +223,12 @@ class OpTest(TestCase):
         self.assertTrue(op_2swap(stack))
         print(stack)
         self.assertEqual(stack, [3,4,1,2])
+
+    def test_op_ifdup(self):
+        stack = [b'1',b'2',b'3',b'4']
+        self.assertTrue(op_ifdup(stack))
+        print(stack)
+        self.assertEqual(stack, [b'1', b'2', b'3', b'4', b'4'])
 
     def test_op_depth(self):
         stack = [1,2,3,100]
@@ -220,47 +282,133 @@ class OpTest(TestCase):
         stack = [b'1', b'2']
         self.assertTrue(op_0notequal(stack))
         print(stack) 
-        self.assertTrue(stack, [b'\x01'])
+        self.assertEqual(stack, [b'1', b'\x01'])
 
     def test_op_add(self):
         stack = [b'1', b'1']
         self.assertTrue(op_add(stack))
         print(stack)
-        self.assertTrue(stack, [b'b'])
+        self.assertEqual(stack, [b'b'])
 
     def test_op_sub(self):
         stack = [b'3', b'2']
         self.assertTrue(op_sub(stack))
         print(stack)
-        self.assertTrue(stack, [b'\x01'])
+        self.assertEqual(stack, [b'\x01'])
 
     def test_op_booland(self):
         stack = [b'1', b'2']
         self.assertTrue(op_booland(stack))
         print(stack)
-        self.assertTrue(stack, [b'\x01'])
+        self.assertEqual(stack, [b'\x01'])
 
     def test_op_boolor(self):
         stack = [b'1', b'2',b'3']
         self.assertTrue(op_boolor(stack))
         print(stack)
-        self.assertTrue(stack, [b'1', b'\x01'])
+        self.assertEqual(stack, [b'1', b'\x01'])
 
     def test_op_numequal(self):
         stack = [b'1', b'2']
         self.assertTrue(op_numequal(stack))
         print(stack)
-        self.assertTrue(stack, [b''])
+        self.assertEqual(stack, [b''])
 
     def test_op_numnotequal(self):
-        stack = [b'1', b'2']
+        stack = [b'2', b'1']
         self.assertTrue(op_numnotequal(stack))
         print(stack)
-        self.assertTrue(stack, [b'\x01'])
+        self.assertEqual(stack, [b'\x01'])
 
+    def test_op_lessthan(self):
+        stack = [b'1', b'2']
+        self.assertTrue(op_lessthan(stack))
+        print(stack)
+        self.assertEqual(stack, [b'\x01'])
+
+    def test_op_greaterthan(self):
+        stack = [b'2', b'1']
+        self.assertTrue(op_greaterthan(stack))
+        print(stack)
+        self.assertEqual(stack, [b'\x01'])
+
+    def test_op_lessthanorequal(self):
+        stack = [b'1', b'1']
+        self.assertTrue(op_lessthanorequal(stack))
+        print(stack)
+        self.assertEqual(stack, [b'\x01'])
+
+    def test_op_greaterthanorequal(self):
+        stack = [b'1', b'1']
+        self.assertTrue(op_greaterthanorequal(stack))
+        print(stack)
+        self.assertEqual(stack, [b'1'])
+
+    def test_op_min(self):
+        stack = [b'100', b'200']
+        self.assertTrue(op_min(stack))
+        print(stack)
+        self.assertEqual(stack, [b'100'])
+
+    def test_op_max(self):
+        stack = [b'111', b'1000']
+        self.assertTrue(op_max(stack))
+        print(stack)
+        self.assertEqual(stack, [b'\x01'])
+
+    def test_op_within(self):
+        stack = [b'110', b'1', b'100']
+        self.assertTrue(op_within(stack))
+        print(stack)
+        self.assertEqual(stack, [b''])
+
+    def test_op_ripemd160(self):
+        stack = [b'10000']
+        self.assertTrue(op_ripemd160(stack))
+        print(stack)
+        self.assertEqual(stack, [b"cN'\xab\x81w\xa3~_\x86\xe2z\xbdb%:,\x13K\x16"])
+
+    def test_op_sha1(self):
+        stack = [b'10000']
+        self.assertTrue(op_sha1(stack))
+        print(stack)
+        self.assertEqual(stack, [b'\x8a\x12\xa3\x15\x08*4_\x1a\x9d:\xd1K!L\xd3m1\x0c\xf8'])
+
+    def test_op_sha256(self):
+        stack = [b'10000']
+        self.assertTrue(op_sha256(stack))
+        print(stack)
+        self.assertEqual(stack, [b'9\xe5\xb4\x83\rM\x9c\x14\xdbsh\xa9[e\xd5F>\xa3\xd0\x95 77#C\x0c\x03\xa5\xa4S\xb5\xdf'])
+
+    def test_op_hash160(self):
+        stack = [b'10000']
+        self.assertTrue(op_hash160(stack))
+        print(stack)
+        self.assertEqual(stack, [b"Y8\x160\xebN\x81\xd1\xcfKI\x94\x02r\x1b'\xc0\x03\xab\x9f"])
+
+    def test_op_pick(self):
+        stack = [b'100']
+        self.assertFalse(op_pick(stack))
+        print("op_pick : ",stack)
+
+    def test_op_tuck(self):
+        stack = [b'1', b'2', b'3', b'4']
+        self.assertTrue(op_tuck(stack))
+        print("op_tuck : ", stack)
+        self.assertEqual(stack, [b'1', b'2', b'4', b'3', b'4'])
+
+    def test_op_negate(self):
+        stack = [b'1', b'2']
+        self.assertTrue(op_negate(stack))
+        print("op_negate : ", stack)
+        self.assertEqual(stack, [b'1', b'\xb2'])
 
 # lib 디렉토리에 있는 Op.py 파일을 실행
+run(OpTest("test_encode_num"))
+run(OpTest("test_decode_num"))
 run(OpTest("test_op_hash160"))
+run(OpTest("test_op_verify"))
+run(OpTest("test_op_return"))
 run(OpTest("test_op_checksig"))
 run(OpTest("test_op_checkmultisig"))
 run(OpTest("test_op_0"))
@@ -273,10 +421,13 @@ run(OpTest("test_op_1sub"))
 run(OpTest("test_op_0notequal"))
 run(OpTest("test_op_toaltstack"))
 run(OpTest("test_op_fromaltstack"))
+run(OpTest("test_op_2drop"))
 run(OpTest("test_op_2dup"))
+run(OpTest("test_op_3dup"))
 run(OpTest("test_op_2over"))
 run(OpTest("test_op_2rot"))
 run(OpTest("test_op_2swap"))
+run(OpTest("test_op_ifdup"))
 run(OpTest("test_op_depth"))
 run(OpTest("test_op_drop"))
 run(OpTest("test_op_nip"))
@@ -292,3 +443,17 @@ run(OpTest("test_op_booland"))
 run(OpTest("test_op_boolor"))
 run(OpTest("test_op_numequal"))
 run(OpTest("test_op_numnotequal"))
+run(OpTest("test_op_lessthan"))
+run(OpTest("test_op_greaterthan"))
+run(OpTest("test_op_lessthanorequal"))
+run(OpTest("test_op_greaterthanorequal"))
+run(OpTest("test_op_min"))
+run(OpTest("test_op_max"))
+run(OpTest("test_op_within"))
+run(OpTest("test_op_ripemd160"))
+run(OpTest("test_op_sha1"))
+run(OpTest("test_op_sha256"))
+run(OpTest("test_op_hash160"))
+run(OpTest("test_op_pick"))
+run(OpTest("test_op_tuck"))
+run(OpTest("test_op_negate"))
