@@ -1,6 +1,7 @@
-from lib.helper from hash256
-from lib.helper from int_to_little_endian
-from lib.helper from little_endian_to_int
+from lib.helper import hash256
+from lib.helper import int_to_little_endian
+from lib.helper import little_endian_to_int
+from IO import BytesIO
 
 NETWORK_MAGIC = b'\xf9\xbe\xb4\xd9'
 TESTNET_NETWORK_MAGIC = b'\x0b\x11\x09\x07'
@@ -46,3 +47,5 @@ class NetworkEnvelope:
         result += self.payload
         return result
 
+    def stream(self):
+        return BytesIO(self.payload)
