@@ -1,4 +1,4 @@
-from helper import little_endian_to_int
+from lib.helper import little_endian_to_int
 TWO_WEEKS = 60 * 60 * 24 * 14   # 초 * 분 * 시 * 일
 
 #26959535291011309493156476344723991336010898738574164086137773096960
@@ -47,6 +47,7 @@ def bit_field_to_bytes(bit_field):
         byte_index, bit_index = divmod(i, 8)
         if bit:
             result[byte_index] |= 1 << bit_index
+    return bytes(result)
 
 def bytes_to_bit_field(some_bytes):
     flag_bits = []
