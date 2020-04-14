@@ -8,7 +8,6 @@ class TxIn:
     def __init__(self, prev_tx, prev_index, script_sig=None, sequence=0xffffffff):
         self.prev_tx = prev_tx
         self.prev_index = prev_index
-
 # TxIN 생성자 호출시 script_sig 인수의 값이 주어지지 않으면 self.script_sig를 Script()로 초기화
 # Script 클래스 생성자는 그냥 빈 클래스를 반환한다.
         if script_sig is None:
