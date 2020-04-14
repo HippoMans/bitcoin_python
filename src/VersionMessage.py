@@ -1,4 +1,5 @@
 from lib.helper import int_to_little_endian
+from lib.helper import encode_varint
 
 class VersionMessage:
     command = b'version'
