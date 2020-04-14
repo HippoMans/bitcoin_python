@@ -167,9 +167,14 @@ class BlockTest(TestCase):
         block_raw = bytes.fromhex('00000020fcb19f7895db08cadc9573e7915e3919fb76d59868a51d995201000000000000acbcab8bcc1af95d8d563b77d24c3d19b18f1486383d75a5085c4e86c86beed691cfa85916ca061a00000000')
         stream = BytesIO(block_raw)
         block = Block.parse(stream)
+        block.tx_hashes = hashes
+        print(type(len(hashes_hex)))
+        for i in range(0, len(hashes_hex)):
+            print("block의 tx_hashes[",i,"] :") 
+            print(block.tx_hashes[i])
         result = block.validate_merkle_root()
-        print(result)
-
+        print("merkle_root : ",result)
+        self.assertTrue(block.validate_merkle_root())
 
 
 # 타원곡선의 학습 과정에서 예제 실험
