@@ -7,7 +7,7 @@ from lib.helper import encode_base58_checksum
 A = 0
 B = 7
 N = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
-
+P = 2**256 - 2 ** 32 - 977
 # secp256k1 곡선 위 점인 공개키 P와 서명키 z로 주어진 2개의 정보에서 서명(r,s)이 유효한지 검증
 
 class S256Point(Point):
@@ -15,11 +15,17 @@ class S256Point(Point):
         a = S256Field(A)
         b = S256Field(B)
         if type(x) == int:
-            X = S256Field(x)
-            Y = S256Field(y)
-            super().__init__(X, Y, a, b)
+            x = S256Field(x)
+            y = S256Field(y)
+            super().__init__(x, y, a, b)
         else:
             super().__init__(x, y, a, b)
+
+    def __repr__(self):
+        if self.x is None:
+            return 'S256Point(infinity)'
+        else:
+            return 'S256Point({}, {})'.format(self.x, self.y)
 
     # 비압축 SEC 형식 직렬화 -> 0x04 + 공개키.x + 공개키.y
     # to_bytes() 함수는 정수형 숫자를 bytes형으로 변경
@@ -39,7 +45,8 @@ class S256Point(Point):
         else:
             return b'\x04' + self.x.num.to_bytes(32, 'big') + self.y.num.to_bytes(32, 'big')
 
-    def verify(self, G, z, sig):
+    def verify(self, z, sig):
+        G = S256Point(0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8)
         # 군의 위수이며 소수인 N(=n)을 페르마의 소정리를 적용하여 s_inv(=1/s)를 계산
         s_inv = pow(sig.s, N-2, N)
         # u = z/s군의 위수인 N으로 나머지 연산(%)을 적용
