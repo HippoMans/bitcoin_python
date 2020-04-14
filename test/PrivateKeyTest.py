@@ -7,6 +7,7 @@ sys.path.append(os.path.abspath(path))
 from unittest import TestCase
 from lib.helper import run
 from lib.helper import hash256
+from lib.helper import hash160
 from src.PrivateKey import PrivateKey
 
 
@@ -58,11 +59,21 @@ class PrivateKeyTest(TestCase):
         priv = PrivateKey(0x54321deadbeef)
         print(priv.wif(compressed=True, testnet=False))  
 
+    def exerciseTest5(self):
+        print("개인키와 비트코인 주소 생성을 위한 연습 -> 향후 비슷하게 사용")
+        passwordString = b"HippoMans"
+        privateSecret = hash160(passwordString)
+        privateSecret = int.from_bytes(privateSecret, 'big')
+        priv = PrivateKey(secret=privateSecret)
+        bitcoinAddress = priv.point.address(compressed=True, testnet=True)
+        print("비트코인 주소 : ", bitcoinAddress)
+
 # 서명 생성  과정에서 얻은 예제 실험
 run(PrivateKeyTest("exerciseTest1"))
 run(PrivateKeyTest("exerciseTest2"))
 run(PrivateKeyTest("exerciseTest3"))
 run(PrivateKeyTest("exerciseTest4"))
+run(PrivateKeyTest("exerciseTest5"))
 
 # PrivateKey 객체에 선언된 함수들을 실험
 run(PrivateKeyTest("test_sign"))
