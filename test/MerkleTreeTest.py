@@ -67,6 +67,11 @@ class MerkleTreeTest(TestCase):
         for i in range(0, 4):
             print(tree.nodes[i])
 
+        hashes = [bytes.fromhex(h)[::-1] for h in hex_hashes]
+        self.assertEqual(mb.hashes, hashes)
+        flags = bytes.fromhex('b55635')
+        self.assertEqual(mb.flags, flags)
+
 
 # 타원곡선의 학습 과정에서 예제 실험
 run(MerkleTreeTest("Test_init"))
