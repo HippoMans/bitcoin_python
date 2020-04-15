@@ -7,6 +7,7 @@ sys.path.append(os.path.abspath(path))
 from unittest import TestCase
 from lib.helper import run
 from lib.helper import hash256
+from lib.helper import little_endian_to_int
 from src.NetworkEnvelope import NetworkEnvelope
 from io import BytesIO
 
@@ -59,7 +60,25 @@ class NetworkEnvelopeTest(TestCase):
         print("envelope.serialize : ", result)
         self.assertEqual(result, msg)
         
+    def Test_stream(self):
+        print("[첫번째]")
+        msg = bytes.fromhex('f9beb4d976657261636b000000000000000000005df6e0e2')
+        stream = BytesIO(msg)
+        envelope = NetworkEnvelope.parse(stream)
+        result = envelope.stream().getvalue()
+        self.assertEqual(result, envelope.payload)
+        print(result)        
+
+        print("\n[두번째]")
+        msg = bytes.fromhex('f9beb4d976657273696f6e0000000000650000005f1a69d2721101000100000000000000bc8f5e5400000000010000000000000000000000000000000000ffffc61b6409208d010000000000000000000000000000000000ffffcb0071c0208d128035cbc97953f80f2f5361746f7368693a302e392e332fcf05050001')
+        stream = BytesIO(msg)
+        envelope = NetworkEnvelope.parse(stream)
+        result = envelope.stream().getvalue()
+        self.assertEqual(result, envelope.payload)
+        print(result.hex())
+
 
 # 비트코인 네트워크 테스트
 run(NetworkEnvelopeTest("Test_parse"))
 run(NetworkEnvelopeTest("Test_serialize"))
+run(NetworkEnvelopeTest("Test_stream"))
